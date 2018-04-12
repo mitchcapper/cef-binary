@@ -36,7 +36,7 @@ Function WriteException($exp){
 try{
 $WorkingDir = split-path -parent $MyInvocation.MyCommand.Definition;
 if ($CefVersion -eq "auto" -and $DownloadBinary -eq "local"){ #Take the version from the local binary only, requires only one version in that folder to work
-	$name = (dir -Filter cef_binary_*_windows64.*.$Extension $CefBinaryDir)[0].Name;
+	$name = (dir -Filter cef_binary_*_windows64.$Extension $CefBinaryDir)[0].Name;
 	$CefVersion = ($name -replace "cef_binary_", "") -replace "_windows64.$Extension";
 }
 
