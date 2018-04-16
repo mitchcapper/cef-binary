@@ -16,28 +16,28 @@ param(
     [Parameter(Position = 3)]
     $CefVersion = "3.3239.1700.g385b2d4",
 
-	[ValidateSet("tar.bz2","zip","7z")]
+    [ValidateSet("tar.bz2","zip","7z")]
     [Parameter()]
     [string] $Extension = "tar.bz2",
-    [Switch] $NoDebug
+    [Switch] $NoDebugBuild
 )
 Set-StrictMode -version latest
 $ErrorActionPreference = "Stop";
 $Extension = $Extension.ToLower();
 Function WriteException($exp){
-	write-host "Caught an exception:" -ForegroundColor Yellow -NoNewline;
-	write-host " $($exp.Exception.Message)" -ForegroundColor Red;
-	write-host "`tException Type: $($exp.Exception.GetType().FullName)";
-	$stack = $exp.ScriptStackTrace;
-	$stack = $stack.replace("`n","`n`t");
-	write-host "`tStack Trace: $stack";
-	throw $exp;
+    write-host "Caught an exception:" -ForegroundColor Yellow -NoNewline;
+    write-host " $($exp.Exception.Message)" -ForegroundColor Red;
+    write-host "`tException Type: $($exp.Exception.GetType().FullName)";
+    $stack = $exp.ScriptStackTrace;
+    $stack = $stack.replace("`n","`n`t");
+    write-host "`tStack Trace: $stack";
+    throw $exp;
 }
 try{
 $WorkingDir = split-path -parent $MyInvocation.MyCommand.Definition;
 if ($CefVersion -eq "auto" -and $DownloadBinary -eq "local"){ #Take the version from the local binary only, requires only one version in that folder to work
-	$name = (dir -Filter cef_binary_*_windows64.$Extension $CefBinaryDir)[0].Name;
-	$CefVersion = ($name -replace "cef_binary_", "") -replace "_windows64.$Extension";
+    $name = (dir -Filter cef_binary_*_windows64.$Extension $CefBinaryDir)[0].Name;
+    $CefVersion = ($name -replace "cef_binary_", "") -replace "_windows64.$Extension";
 }
 
 
@@ -354,12 +354,12 @@ function VSX
 
     Write-Diagnostic "Starting to build targeting toolchain $Toolchain"
 
-    if (! $NoDebug){
-    	Msvs "$Toolchain" 'Debug' 'x86'
+    if (! $NoDebugBuild){
+        Msvs "$Toolchain" 'Debug' 'x86'
     }
     Msvs "$Toolchain" 'Release' 'x86'
-    if (! $NoDebug){
-    	Msvs "$Toolchain" 'Debug' 'x64'
+    if (! $NoDebugBuild){
+        Msvs "$Toolchain" 'Debug' 'x64'
     }
     Msvs "$Toolchain" 'Release' 'x64'
 
@@ -437,11 +437,11 @@ function Nupkg
 
 function DownloadNuget()
 {
-	$folder = Join-Path $env:LOCALAPPDATA .\nuget;
+    $folder = Join-Path $env:LOCALAPPDATA .\nuget;
     $Nuget = Join-Path $folder .\NuGet.exe
     if (-not (Test-Path $Nuget))
     {
-    	mkdir $folder
+        mkdir $folder
         $Client = New-Object System.Net.WebClient;
         $Client.DownloadFile('http://nuget.org/nuget.exe', $Nuget);
     }
@@ -565,15 +565,15 @@ function CopyFromLocalCefBuild()
         sz x $LocalFile;
 
         if ($Extension -eq "tar.bz2"){
-        	# Extract tar file
-        	$TarFile = ($LocalFile).Substring(0, $LocalFile.length - 4)
-        	sz x $TarFile
+            # Extract tar file
+            $TarFile = ($LocalFile).Substring(0, $LocalFile.length - 4)
+            sz x $TarFile
 
-        	# Sleep for a short period to allow 7z to release it's file handles
-        	sleep -m 2000
+            # Sleep for a short period to allow 7z to release it's file handles
+            sleep -m 2000
 
-        	# Remove tar file
-        	Remove-Item $TarFile
+            # Remove tar file
+            Remove-Item $TarFile
         }
 
         $Folder = Join-Path $WorkingDir ($Cef32FileName.Substring(0, $Cef32FileName.length - ($Extension.Length+1)))
@@ -596,16 +596,16 @@ function CopyFromLocalCefBuild()
         sz x $LocalFile;
 
         if ($Extension -eq "tar.bz2"){
-	        # Extract tar file
-	        $TarFile = ($LocalFile).Substring(0, $LocalFile.length - 4)
-	        sz x $TarFile
+            # Extract tar file
+            $TarFile = ($LocalFile).Substring(0, $LocalFile.length - 4)
+            sz x $TarFile
 
-	        # Sleep for a short period to allow 7z to release it's file handles
-	        sleep -m 2000
+            # Sleep for a short period to allow 7z to release it's file handles
+            sleep -m 2000
 
-	        # Remove tar file
-	        Remove-Item $TarFile
-	    }
+            # Remove tar file
+            Remove-Item $TarFile
+        }
         $Folder = Join-Path $WorkingDir ($Cef64FileName.Substring(0, $Cef64FileName.length - ($Extension.Length+1)))
         Move-Item ($Folder + '\*') $Cef64 -force
         Remove-Item $Folder
@@ -652,7 +652,7 @@ switch -Exact ($Target) {
         #VSX v110
         #VSX v120
         VSX v141
-		VSX v140
+        VSX v140
         Nupkg
     }
     "nupkg-only" {
@@ -672,5 +672,5 @@ switch -Exact ($Target) {
     }
 }
 }catch{
-	WriteException $_;
+    WriteException $_;
 }
